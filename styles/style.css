@@ -11,6 +11,13 @@ body {
     background-color: #F29E4C;
 }
 
+h1 {
+    text-align: center;
+    margin-top: 15px;
+    text-decoration: underline;
+    color: black;
+}
+
 #container {
   background-color: #EFEA5A;
   width: max-content;
