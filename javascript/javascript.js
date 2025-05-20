@@ -35,7 +35,7 @@ function clearCalculations() {
   numbers = [];
   operators = [];
   hasDecimal = false;
-  displayValue = 0;
+  displayValue = "0";
   updateDisplay();
 }
 
@@ -108,7 +108,8 @@ function handleClick(click) {
     } else {
         operators.push(click);
     }
-  } 
+  }
+  console.log("displayValue: " + displayValue + " numbers: " + numbers);
 }
 
 // Sets up eventListeners on ever button on the document with a click event, using the event handler handleClick to use the value of the button clicked to decide what to do from there
