@@ -2,16 +2,13 @@ const buttons = document.querySelectorAll("button");
 const display = document.querySelector("#display");
 
 let displayValue = "0";
-let firstNumber = null;
-let operator = null;
-let secondNumber = null;
-let result = null;
-
+let numbers = [];
+let operators = [];
 let hasDecimal = false;
 
 // Updates the display with whatever the current displayValue is, only displays the first 11 characters of the string
 function updateDisplay() {
-  display.textContent = displayValue.substring(0, 11);
+  display.textContent = String(displayValue).substring(0, 11);
 }
 
 // Appends a value given to it to the displayValue and updates the display to match the new displayValue, will not append if length is already 11 characters long
@@ -35,69 +32,83 @@ function clearDisplay() {
 
 // Clears the calculations of the calculater to be used fresh if needed
 function clearCalculations() {
-  result = null;
-  firstNumber = null;
-  secondNumber = null;
-  operator = null;
+  numbers = [];
+  operators = [];
+  hasDecimal = false;
+  displayValue = 0;
+  updateDisplay();
 }
 
 // Handles turning the displayValue to either a negative or positve value, updates the display to show the new displayValue
 function handleSign() {
-  displayValue = displayValue * -1;
+  displayValue = (parseFloat(displayValue) * -1).toString();
   updateDisplay();
+}
+
+// Handles figuring out the precentage by dividing by 100
+function handlePercent() {
+  displayValue = (parseFloat(displayValue) / 100).toString();
+  updateDisplay();
+}
+
+// Returns an integer that was two strings added with each other
+function add(...numbers) {
+  return numbers.reduce((sum, num) => sum + Number(num), 0);
+}
+
+function subtract(a, b) {
+  return Number(a) - Number(b);
+}
+
+function multiply(a, b) {
+  return Number(a) * Number(b);
+}
+
+function divide(a, b) {
+  if (Number(b) === 0) {
+    return "Error";
+  } else {
+    return Number(a) / Number(b);
+  }
 }
 
 // Handles click -- work in progress --
 function handleClick(click) {
-  console.log(click);
   if (click === "clear") {
-    clearDisplay();
+    clearCalculations();
   } else if (click === "=") {
-    if (firstNumber !== null && secondNumber !== null && operator !== null) {
-      displayValue = operate(firstNumber, secondNumber, operator);
+    if (numbers.length > 0 && operators.length > 0) {
+      numbers.push(displayValue);
+      displayValue = operate().toString();
+      clearCalculations();
       updateDisplay();
-    } else {
-        if (firstNumber !== null && secondNumber === null && operator !== null) {
-            secondNumber = displayValue;
-            operate(firstNumber, secondNumber, operator);
-            console.log(firstNumber, operator, secondNumber);
-            clearCalculations();
-        }
     }
   } else if (click === "sign") {
     handleSign();
-    return result;
-  } else if (click >= 0 && click <= 9) {
+  } else if (click === "percent") {
+    handlePercent();
+  } else if (click >= "0" && click <= "9") {
     appendToDisplay(click);
   } else if (click === ".") {
     if (!hasDecimal) {
-      hasDecimal = true;
-      appendToDisplay(click);
+        hasDecimal = true;
+        appendToDisplay(click);
     }
-  } else if (click === "percent") {
-    // ? **********************************************************************************************************************************
-  } else if (click === "+") {
-    operator = click;
-    if(firstNumber === null) {
-        firstNumber = displayValue;
+  } else if (["+", "-", "*", "/"].includes(click)) {
+    if (displayValue !== "0" || numbers.length > 0) {
+        numbers.push(displayValue);
+        operators.push(click);
+        if (numbers.length > 1) {
+            displayValue = operate();
+            numbers = [displayValue];
+            operators = [click];
+            updateDisplay();
+        }
+        clearDisplay();
     } else {
-        
+        operators.push(click);
     }
-    console.log("Operator: " + operator);
-    clearDisplay();
-  } else if (click === "-") {
-    operator = click;
-    console.log("Operator: " + operator);
-    clearDisplay();
-  } else if (click === "*") {
-    operator = click;
-    console.log("Operator: " + operator);
-    clearDisplay();
-  } else if (click === "/") {
-    operator = click;
-    console.log("Operator: " + operator);
-    clearDisplay();
-  }
+  } 
 }
 
 // Sets up eventListeners on ever button on the document with a click event, using the event handler handleClick to use the value of the button clicked to decide what to do from there
@@ -114,38 +125,22 @@ updateDisplay();
 setUpEventListeners();
 
 // Operation function to use a sign to determine which calculation to complete
-function operate(firstNum, secondNum, op) {
-  if (op === "+") {
-    return add(firstNum, secondNum);
-  } else if (op === "-") {
-    return subtract(firstNum, secondNum);
-  } else if (op === "*") {
-    return multiply(firstNum, secondNum);
-  } else {
-    return divide(firstNum, secondNum);
+function operate() {
+  if (numbers.length < 1 || operators.length < 1) return displayValue;
+
+  let result = Number(numbers[0]);
+  for (let i = 0; i < operators.length; i++) {
+    const nextNum = Number(numbers[i + 1] || displayValue);
+    if (operators[i] === "+") {
+      result = add(result, nextNum);
+    } else if (operators[i] === "-") {
+      result = subtract(result, nextNum);
+    } else if (operators[i] === "*") {
+      result = multiply(result, nextNum);
+    } else if (operate[i] === "/") {
+      result = divide(result, nextNum);
+      if (result === "Error") return result;
+    }
   }
-}
-
-// console.log(operate(12, 0, "/"));
-
-// Returns an integer that was two strings added with each other
-function add(a, b) {
-  result = parseInt(a) + parseInt(b);
-  return result;
-}
-
-function subtract(a, b) {
-  return a - b;
-}
-
-function multiply(a, b) {
-  return a * b;
-}
-
-function divide(a, b) {
-  if (b <= 0) {
-    return "Error";
-  } else {
-    return a / b;
-  }
+  return result.toString();
 }
