@@ -49,8 +49,16 @@ h1 {
 button {
   flex: 1 20%;
   padding: 15px;
-  font-size: 22px;
+  font-size: 27px;
   border-radius: 5px;
+}
+
+button:hover {
+  opacity: 70%;
+}
+
+button:active {
+  opacity: 90%;
 }
 
 #zero-btn {
